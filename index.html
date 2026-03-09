@@ -291,8 +291,8 @@ let spots=47;
 function setSpots(n){ document.getElementById('eyebrow-txt').textContent = n+' spots remaining in early access'; document.getElementById('spots-left').textContent = n+' left'; }
 setInterval(()=>{ if(spots>25 && Math.random()>.6){ spots--; setSpots(spots); } }, 22000);
 
-// Formspree form ID - replace with your own after creating at formspree.io
-const FORMSPREE_ID = 'xnnpqpwd';
+// Basin form endpoint - free, no account needed for basic usage
+const BASIN_ENDPOINT = 'https://usebasin.com/f/05f4cdbdbc15';
 
 async function join(src){
 const emailEl = document.getElementById(src==='h'?'hemail':'femail');
@@ -306,13 +306,18 @@ return;
 }
 
 try {
-const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+const formData = new FormData();
+formData.append('email', email);
+formData.append('name', email.split('@')[0]);
+formData.append('source', 'alfred-landing');
+formData.append('_gotcha', ''); // honeypot field
+
+const response = await fetch(BASIN_ENDPOINT, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, source: 'alfred-landing', name: email.split('@')[0] })
+  body: formData
 });
 
-if (response.ok) {
+if (response.ok || response.redirected) {
   if(src==='h'){ document.getElementById('hform').style.display='none'; document.getElementById('hsuccess').classList.add('show'); }
   else { document.getElementById('fform').style.display='none'; document.getElementById('fsuccess').classList.add('show'); }
   spots=Math.max(spots-1,1); setSpots(spots);

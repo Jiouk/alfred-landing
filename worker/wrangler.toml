@@ -1,0 +1,6 @@
+name = "alfred-landing-form"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+vars = { NOTION_DATABASE_ID = "4dd9e6450fd843e9982c6784b539dbc6" }
