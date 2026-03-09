@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alfred - Your Personal Assistant on Telegram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0d1117;
+  --surface: #121825;
+  --surface2: #1a2438;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e6edf8;
+  --text2: #7a8ea8;
+  --text3: #3c4f68;
+  --blue: #3b82f6;
+  --blue2: #6fa3fa;
+  --blue3: #bfdbfe;
+  --bdim: rgba(59,130,246,0.12);
+  --green: #10b981;
+  --gdim: rgba(16,185,129,0.10);
+  --gold: #f59e0b;
+  --goldim: rgba(245,158,11,0.10);
+  --red: #ef4444;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; cursor:none; }
+#cur { position:fixed; width:8px; height:8px; background:var(--blue2); border-radius:50%; pointer-events:none; z-index:99999; transform:translate(-50%,-50%); transition:transform .15s, background .2s; }
+#cur-ring { position:fixed; width:34px; height:34px; border:1px solid rgba(111,163,250,0.3); border-radius:50%; pointer-events:none; z-index:99998; transform:translate(-50%,-50%); transition:width .2s, height .2s, border-color .2s; }
+body:has(button:hover) #cur, body:has(a:hover) #cur { transform:translate(-50%,-50%) scale(3); background:var(--gold); }
+body:has(button:hover) #cur-ring, body:has(a:hover) #cur-ring { width:54px; height:54px; border-color:rgba(245,158,11,0.25); }
+body::after { content:''; position:fixed; inset:0; opacity:.45; pointer-events:none; z-index:9990; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+.orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+.o1 { width:700px; height:700px; background:rgba(59,130,246,0.08); top:-200px; right:-150px; animation:drift1 22s ease-in-out infinite; }
+.o2 { width:500px; height:500px; background:rgba(245,158,11,0.05); bottom:0; left:-150px; animation:drift2 28s ease-in-out infinite; }
+.o3 { width:300px; height:300px; background:rgba(16,185,129,0.06); top:50%; right:8%; animation:drift3 18s ease-in-out infinite; }
+@keyframes drift1 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-60px,80px);} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(80px,-60px);} }
+@keyframes drift3 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-40px,50px);} }
+nav { position:fixed; top:0; left:0; right:0; z-index:500; display:flex; align-items:center; justify-content:space-between; padding:0 56px; height:64px; border-bottom:1px solid var(--border); background:rgba(7,9,15,0.8); backdrop-filter:blur(24px); }
+.logo { font-family:'Bricolage Grotesque',sans-serif; font-size:21px; font-weight:800; letter-spacing:-.5px; display:flex; align-items:center; gap:10px; }
+.logo-mark { width:30px; height:30px; background:var(--blue); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:0 0 24px rgba(59,130,246,0.45); }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.live-pill { display:flex; align-items:center; gap:6px; background:var(--gdim); border:1px solid rgba(16,185,129,0.22); color:var(--green); font-size:12px; font-weight:600; padding:5px 13px; border-radius:100px; }
+.pulse { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.25;} }
+.btn { font-family:'Outfit',sans-serif; font-size:14px; font-weight:500; padding:10px 22px; border-radius:10px; border:none; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+.btn-primary { background:var(--blue); color:#fff; box-shadow:0 0 30px rgba(59,130,246,0.3); }
+.btn-primary:hover { background:#5b9bff; transform:translateY(-2px); box-shadow:0 12px 40px rgba(59,130,246,0.4); }
+.btn-ghost { background:transparent; color:var(--text2); border:1px solid var(--border2); }
+.btn-ghost:hover { color:var(--text); border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.03); }
+section { position:relative; z-index:1; }
+.hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:110px 24px 80px; }
+.eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.04); border:1px solid var(--border2); border-radius:100px; padding:6px 16px; font-size:12.5px; font-weight:500; color:var(--text2); margin-bottom:36px; animation:fadeUp .7s ease both; }
+.hero h1 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(48px,8vw,108px); font-weight:800; line-height:1.0; letter-spacing:-3px; margin-bottom:28px; animation:fadeUp .7s .1s ease both; }
+.line1 { display:block; color:var(--text); }
+.line2 { display:block; font-style:italic; font-weight:300; letter-spacing:-2px; color:transparent; -webkit-text-stroke:1.5px rgba(111,163,250,0.4); }
+.line3 { display:block; background:linear-gradient(130deg, var(--blue2) 0%, var(--blue3) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub { font-size:clamp(15px,2.2vw,20px); color:var(--text2); max-width:540px; line-height:1.68; font-weight:300; margin-bottom:48px; animation:fadeUp .7s .2s ease both; }
+.hero-sub strong { color:var(--text); font-weight:500; }
+.saves { display:flex; gap:12px; margin-bottom:48px; animation:fadeUp .7s .25s ease both; flex-wrap:wrap; justify-content:center; }
+.save-chip { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border2); border-radius:12px; padding:10px 18px; font-size:14px; font-weight:500; }
+.save-chip .val { font-family:'Bricolage Grotesque',sans-serif; font-size:22px; font-weight:800; color:var(--green); }
+.save-chip .lbl { color:var(--text2); font-size:13px; line-height:1.3; }
+.hero-form { display:flex; gap:8px; width:100%; max-width:440px; margin:0 auto 16px; animation:fadeUp .7s .3s ease both; }
+.email-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border2); border-radius:12px; padding:14px 18px; color:var(--text); font-family:'Outfit',sans-serif; font-size:15px; outline:none; transition:border-color .2s, box-shadow .2s; }
+.email-input::placeholder { color:var(--text3); }
+.email-input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
+.microcopy { font-size:13px; color:var(--text3); animation:fadeUp .7s .35s ease both; }
+.microcopy span { color:var(--green); }
+.scarcity { margin-top:40px; animation:fadeUp .7s .45s ease both; }
+.sc-bar { width:300px; max-width:100%; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin:0 auto 10px; overflow:hidden; }
+.sc-fill { height:100%; width:0; background:linear-gradient(90deg, var(--blue), var(--gold)); border-radius:2px; animation:barfill 2.2s 1s ease forwards; }
+@keyframes barfill { to { width:74%; } }
+.sc-label { font-size:12px; color:var(--text3); text-align:center; }
+.sc-label strong { color:var(--gold); }
+.proof { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:48px; animation:fadeUp .7s .55s ease both; }
+.avatars { display:flex; }
+.ava { width:32px; height:32px; border-radius:50%; border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; margin-left:-10px; }
+.ava:first-child { margin-left:0; }
+.proof-copy { font-size:13px; color:var(--text2); line-height:1.45; }
+.stars { color:var(--gold); font-size:11px; margin-bottom:2px; }
+.success-state { display:none; flex-direction:column; align-items:center; gap:6px; animation:fadeUp .5s ease; }
+.success-state.show { display:flex; }
+.check-circle { width:56px; height:56px; border-radius:50%; background:var(--gdim); border:1px solid rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:4px; }
+.success-state h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:24px; font-weight:700; }
+.success-state p { font-size:14px; color:var(--text2); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+.wrap { max-width:1060px; margin:0 auto; padding:100px 48px; }
+.tag { display:inline-flex; align-items:center; gap:8px; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:600; color:var(--blue2); margin-bottom:18px; }
+.tag::before { content:''; display:block; width:20px; height:1px; background:var(--blue2); }
+.section-h { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(28px,4vw,52px); font-weight:800; letter-spacing:-1.5px; line-height:1.1; margin-bottom:56px; }
+.section-h em { font-style:italic; font-weight:300; color:var(--blue2); }
+.steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); border-radius:20px; overflow:hidden; }
+.step { background:var(--bg2); padding:40px 32px; transition:background .25s; position:relative; overflow:hidden; }
+.step::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--blue),transparent); opacity:0; transition:opacity .3s; }
+.step:hover { background:var(--surface); }
+.step:hover::after { opacity:1; }
+.step-n { font-family:'Bricolage Grotesque',sans-serif; font-size:56px; font-weight:800; font-style:italic; color:rgba(59,130,246,0.1); line-height:1; margin-bottom:20px; transition:color .3s; }
+.step:hover .step-n { color:rgba(59,130,246,0.2); }
+.step-icon { font-size:22px; margin-bottom:14px; }
+.step h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:19px; font-weight:700; letter-spacing:-.4px; margin-bottom:10px; }
+.step p { font-size:14px; color:var(--text2); line-height:1.7; font-weight:300; }
+.step-badge { display:inline-block; margin-top:14px; font-size:11px; font-weight:600; color:var(--green); background:var(--gdim); border:1px solid rgba(16,185,129,0.15); padding:3px 10px; border-radius:100px; }
+.perks-section { border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.06) 0%,transparent 65%); padding:100px 48px; }
+.perks-inner { max-width:860px; margin:0 auto; text-align:center; }
+.perks-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:52px; }
+.perk { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:28px 22px; transition:all .25s; }
+.perk:hover { border-color:var(--gold); transform:translateY(-4px); }
+.perk-em { font-size:30px; margin-bottom:16px; }
+.perk h4 { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700; letter-spacing:-.3px; margin-bottom:8px; }
+.perk p { font-size:13px; color:var(--text2); line-height:1.65; font-weight:300; }
+.perk-badge { display:inline-block; margin-top:12px; font-size:11px; font-weight:600; color:var(--gold); background:var(--goldim); border:1px solid rgba(245,158,11,0.2); padding:3px 10px; border-radius:100px; }
+.final-cta { padding:130px 48px; text-align:center; position:relative; overflow:hidden; }
+.final-cta::before { content:''; position:absolute; width:900px; height:900px; background:radial-gradient(circle,rgba(59,130,246,0.07) 0%,transparent 65%); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
+.final-cta h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(36px,5.5vw,70px); font-weight:800; letter-spacing:-2.5px; line-height:1.05; margin-bottom:18px; position:relative; z-index:1; }
+.final-cta h2 em { font-style:italic; font-weight:300; color:var(--blue2); }
+.final-cta > p { font-size:18px; color:var(--text2); margin-bottom:44px; font-weight:300; position:relative; z-index:1; }
+.final-form { display:flex; gap:8px; max-width:420px; margin:0 auto 18px; position:relative; z-index:1; }
+footer { border-top:1px solid var(--border); padding:28px 56px; display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--text3); position:relative; z-index:1; flex-wrap:wrap; gap:12px; }
+.f-logo { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:800; color:var(--text2); }
+.f-powered { display:flex; align-items:center; gap:5px; font-size:12px; }
+.f-powered strong { color:var(--text2); }
+#toasts { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+.toast { background:var(--surface2); border:1px solid var(--border2); border-left:3px solid var(--green); border-radius:12px; padding:13px 18px; font-size:14px; color:var(--text); display:flex; align-items:center; gap:10px; animation:slideIn .3s ease; box-shadow:0 8px 32px rgba(0,0,0,0.45); }
+@keyframes slideIn { from{opacity:0;transform:translateX(14px);} to{opacity:1;transform:translateX(0);} }
+@media(max-width:880px) {
+  nav { padding:0 20px; }
+  .wrap, .perks-section, .final-cta { padding-left:20px; padding-right:20px; }
+  .steps, .perks-grid { grid-template-columns:1fr; }
+  .hero-form, .final-form { flex-direction:column; }
+  footer { flex-direction:column; align-items:flex-start; gap:16px; }
+  body { cursor:auto; }
+  #cur,#cur-ring { display:none; }
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<nav>
+<div class="logo"><div class="logo-mark">A</div> Alfred</div>
+<div class="nav-right">
+<div class="live-pill"><div class="pulse"></div> Early Access Open</div>
+<button class="btn btn-primary" style="padding:8px 18px;font-size:13px;" onclick="scrollCTA()">Join Waitlist</button>
+</div>
+</nav>
+
+<section class="hero">
+<div class="eyebrow"><div class="pulse"></div><span id="eyebrow-txt">47 spots remaining in early access</span></div>
+<h1><span class="line1">Your personal assistant.</span><span class="line2">always available.</span><span class="line3">on Telegram.</span></h1>
+<p class="hero-sub">Talk to Alfred like you would a brilliant colleague. He remembers everything, handles the boring stuff, and helps you make better decisions - <strong>saving you hours every week and thousands a year.</strong></p>
+
+<div class="saves">
+<div class="save-chip"><div class="val">10h+</div><div class="lbl">saved per<br>week</div></div>
+<div class="save-chip"><div class="val">500+</div><div class="lbl">saved vs a<br>human assistant</div></div>
+<div class="save-chip"><div class="val">24/7</div><div class="lbl">available, no<br>weekends off</div></div>
+</div>
+
+<div class="hero-form" id="hform">
+<input class="email-input" type="email" id="hemail" placeholder="your@email.com">
+<button class="btn btn-primary" style="padding:14px 26px;font-size:15px;" onclick="join('h')">Get Early Access</button>
+</div>
+
+<div class="success-state" id="hsuccess">
+<div class="check-circle">✓</div>
+<h3>You're in the list!</h3>
+<p>We'll reach out within 24h with your Telegram link.</p>
+</div>
+
+<p class="microcopy"><span>✓ Free</span> to join · No app to install · <span>✓ Works on Telegram</span></p>
+
+<div class="scarcity">
+<div class="sc-bar"><div class="sc-fill"></div></div>
+<div class="sc-label"><strong>74%</strong> of early access spots claimed · Only <strong id="spots-left">47 left</strong></div>
+</div>
+
+<div class="proof">
+<div class="avatars">
+<div class="ava" style="background:#3b82f6;">M</div>
+<div class="ava" style="background:#8b5cf6;">S</div>
+<div class="ava" style="background:#ec4899;">A</div>
+<div class="ava" style="background:#f59e0b;">D</div>
+<div class="ava" style="background:#10b981;">K</div>
+</div>
+<div class="proof-copy">
+<div class="stars">★★★★★</div>
+<span>Joined by <strong style="color:var(--text);">200+ people</strong> this week</span>
+</div>
+</div>
+</section>
+
+<section>
+<div class="wrap">
+<div class="tag">How it works</div>
+<h2 class="section-h">No apps. No setup.<br><em>Just open Telegram.</em></h2>
+<div class="steps">
+<div class="step">
+<div class="step-n">01</div>
+<div class="step-icon">💬</div>
+<h3>Start talking</h3>
+<p>Open Alfred on Telegram and just tell him what's on your mind. No onboarding, no forms, no learning curve. Just a conversation.</p>
+<span class="step-badge">Ready in 60 seconds</span>
+</div>
+<div class="step">
+<div class="step-n">02</div>
+<div class="step-icon">🧠</div>
+<h3>He learns your world</h3>
+<p>Alfred remembers everything - your clients, your goals, your preferences, your decisions. Every conversation makes him more useful to you specifically.</p>
+<span class="step-badge">Gets smarter daily</span>
+</div>
+<div class="step">
+<div class="step-n">03</div>
+<div class="step-icon">⚡</div>
+<h3>You get your time back</h3>
+<p>Emails drafted, decisions thought through, tasks handled, reminders set. Alfred takes everything off your plate so you can focus on what actually matters.</p>
+<span class="step-badge">Always available</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="perks-section">
+<div class="perks-inner">
+<div class="tag" style="justify-content:center;">Early access exclusive</div>
+<h2 class="section-h" style="text-align:center;margin-bottom:10px;">Join now.<br><em>Stay ahead.</em></h2>
+<p style="color:var(--text2);font-size:16px;font-weight:300;max-width:460px;margin:0 auto;">These perks are locked in permanently for early members. Gone after public launch.</p>
+<div class="perks-grid">
+<div class="perk">
+<div class="perk-em">💰</div>
+<h4>Founder pricing - forever</h4>
+<p>Early adopters lock in 60% off for the lifetime of their account. Your price never increases.</p>
+<span class="perk-badge">Lifetime deal</span>
+</div>
+<div class="perk">
+<div class="perk-em">🎯</div>
+<h4>White-glove onboarding</h4>
+<p>We personally configure Alfred for your exact situation. You don't touch a single setting.</p>
+<span class="perk-badge">Done for you</span>
+</div>
+<div class="perk">
+<div class="perk-em">📞</div>
+<h4>Shape the roadmap</h4>
+<p>Direct access to the founders. You decide what Alfred learns to do next.</p>
+<span class="perk-badge">Founder community</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="final-cta" id="cta">
+<h2>Stop doing everything<br>yourself. <em>You have Alfred.</em></h2>
+<p>Join the waitlist. Alfred will reach out on Telegram within 24h.</p>
+<div class="final-form" id="fform">
+<input class="email-input" type="email" id="femail" placeholder="your@email.com">
+<button class="btn btn-primary" style="padding:14px 26px;font-size:15px;" onclick="join('f')">Claim My Spot</button>
+</div>
+<div class="success-state" id="fsuccess">
+<div class="check-circle">✓</div>
+<h3>Welcome aboard.</h3>
+<p>Alfred will message you on Telegram within 24 hours.</p>
+</div>
+<p style="font-size:13px;color:var(--text3);margin-top:16px;position:relative;z-index:1;">Free to join · No credit card · Works inside Telegram</p>
+</section>
+
+<footer>
+<div class="f-logo">Alfred</div>
+<div class="f-powered">⚡ Powered by <strong>Doable Labs</strong></div>
+<div style="font-size:12px;">© 2026 Alfred. All rights reserved.</div>
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+(function tick(){ rx+=(mx-rx)*.1; ry+=(my-ry)*.1; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(tick); })();
+
+let spots=47;
+function setSpots(n){ document.getElementById('eyebrow-txt').textContent = n+' spots remaining in early access'; document.getElementById('spots-left').textContent = n+' left'; }
+setInterval(()=>{ if(spots>25 && Math.random()>.6){ spots--; setSpots(spots); } }, 22000);
+
+async function join(src){
+const emailEl = document.getElementById(src==='h'?'hemail':'femail');
+const email = emailEl.value.trim();
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+emailEl.style.borderColor='var(--red)';
+emailEl.style.boxShadow='0 0 0 3px rgba(239,68,68,0.15)';
+setTimeout(()=>{ emailEl.style.borderColor=''; emailEl.style.boxShadow=''; },2000);
+toast('Please enter a valid email');
+return;
+}
+try {
+await fetch('https://thee-describing-arctic-advise.trycloudflare.com/onboarding/claim-agent',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, name: email.split('@')[0] }) });
+} catch {}
+if(src==='h'){ document.getElementById('hform').style.display='none'; document.getElementById('hsuccess').classList.add('show'); }
+else { document.getElementById('fform').style.display='none'; document.getElementById('fsuccess').classList.add('show'); }
+spots=Math.max(spots-1,1); setSpots(spots);
+toast('🎉 You\'re on the list! Check your inbox.');
+}
+
+function scrollCTA(){ document.getElementById('cta').scrollIntoView({behavior:'smooth'}); }
+
+document.querySelectorAll('.email-input').forEach(inp=>{
+inp.addEventListener('keydown',e=>{ if(e.key==='Enter') join(inp.id==='hemail'?'h':'f'); });
+});
+
+function toast(msg){
+const t=document.createElement('div');
+t.className='toast';
+t.textContent=msg;
+document.getElementById('toasts').appendChild(t);
+setTimeout(()=>t.remove(),4200);
+}
+
+const obs=new IntersectionObserver(entries=>{
+entries.forEach(e=>{ if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }});
+},{threshold:.1});
+document.querySelectorAll('.step,.perk').forEach(el=>{
+el.style.opacity='0'; el.style.transform='translateY(24px)'; el.style.transition='opacity .6s ease, transform .6s ease'; obs.observe(el);
+});
+</script>
+</body>
+</html>
