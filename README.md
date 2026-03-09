@@ -2,57 +2,40 @@
 
 Personal AI assistant landing page with waitlist form.
 
-## Structure
+## 🚀 Quick Deploy
+
+### Frontend (GitHub Pages) - ✅ LIVE
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-LIVE-brightgreen)](https://jiouk.github.io/alfred-landing/)
+
+**URL:** https://jiouk.github.io/alfred-landing/
+
+### Backend API (Render) - ⏳ NEEDS DEPLOY
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Jiouk/alfred-landing)
+
+**Βήματα:**
+1. Click το παραπάνω κουμπί "Deploy to Render"
+2. Δώσε τα environment variables (στείλε μου μήνυμα για τα tokens):
+   - `NOTION_TOKEN`: (ζήτα το από μένα)
+   - `NOTION_DATABASE_ID`: `4dd9e6450fd843e9982c6784b539dbc6`
+3. Click "Create Web Service"
+
+## 📧 Form Integration
+
+Μετά το deploy του API, update το `index.html` με το νέο URL:
+```javascript
+const API_URL = 'https://alfred-landing-api.onrender.com/api/waitlist';
+```
+
+## 🗄️ Notion Database
+
+Τα emails αποθηκεύονται αυτόματα στο Notion database:
+https://www.notion.so/4dd9e6450fd843e9982c6784b539dbc6
+
+## 📁 Structure
 
 - `index.html` - Main landing page
-- `README.md` - This file
-
-## Deployment
-
-### Option 1: Cloudflare Pages (Recommended)
-
-1. Push to GitHub:
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/alfred-landing.git
-git push -u origin main
-```
-
-2. Go to [dash.cloudflare.com](https://dash.cloudflare.com)
-3. Workers & Pages → Create application → Pages
-4. Connect to GitHub repo
-5. Deploy
-
-### Option 2: Vercel
-
-```bash
-npx vercel --prod
-```
-
-### Option 3: Netlify
-
-Drag & drop the folder to [netlify.com](https://netlify.com)
-
-## API Endpoint
-
-The waitlist form submits to:
-```
-POST https://thee-describing-arctic-advise.trycloudflare.com/onboarding/claim-agent
-```
-
-Body:
-```json
-{
-  "email": "user@example.com",
-  "name": "user"
-}
-```
-
-## Custom Domain
-
-To use your own domain:
-1. Add domain in Cloudflare Pages dashboard
-2. Update DNS records
-3. Update API endpoint URL in `index.html` if needed
+- `api/` - Backend server (Express.js)
+- `render.yaml` - Render deployment config
 
 ## Credits
 
