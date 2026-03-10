@@ -291,8 +291,8 @@ let spots=47;
 function setSpots(n){ document.getElementById('eyebrow-txt').textContent = n+' spots remaining in early access'; document.getElementById('spots-left').textContent = n+' left'; }
 setInterval(()=>{ if(spots>25 && Math.random()>.6){ spots--; setSpots(spots); } }, 22000);
 
-// Use Basin form backend - free tier, no account required
-const BASIN_ENDPOINT = 'https://usebasin.com/f/05f4cdbdbc15';
+// Alfred Waitlist API - sends directly to Notion
+const WORKER_ENDPOINT = 'https://alfred-waitlist-sable.vercel.app/api/submit';
 
 async function join(src){
 const emailEl = document.getElementById(src==='h'?'hemail':'femail');
@@ -311,23 +311,22 @@ const submissions = JSON.parse(localStorage.getItem('waitlist') || '[]');
 submissions.push({ email, date: new Date().toISOString() });
 localStorage.setItem('waitlist', JSON.stringify(submissions));
 
-// Send to Basin
-const formData = new FormData();
-formData.append('email', email);
-formData.append('name', email.split('@')[0]);
-formData.append('source', 'alfred-landing');
-formData.append('_gotcha', ''); // honeypot
-
-const response = await fetch(BASIN_ENDPOINT, {
+// Send to worker
+const response = await fetch(WORKER_ENDPOINT, {
   method: 'POST',
-  body: formData
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: email,
+    name: email.split('@')[0],
+    source: 'alfred-landing'
+  })
 });
 
-if (response.ok || response.redirected) {
+if (response.ok) {
   if(src==='h'){ document.getElementById('hform').style.display='none'; document.getElementById('hsuccess').classList.add('show'); }
   else { document.getElementById('fform').style.display='none'; document.getElementById('fsuccess').classList.add('show'); }
   spots=Math.max(spots-1,1); setSpots(spots);
-  toast('🎉 You\'re on the list! Check your inbox.');
+  toast('🎉 You\'re on the list! We\'ll reach out soon.');
 } else {
   // Still show success since we saved to localStorage
   if(src==='h'){ document.getElementById('hform').style.display='none'; document.getElementById('hsuccess').classList.add('show'); }

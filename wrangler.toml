@@ -1,0 +1,7 @@
+name = "alfred-waitlist"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# NOTION_TOKEN should be set as a secret:
+# wrangler secret put NOTION_TOKEN

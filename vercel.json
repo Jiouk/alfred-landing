@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "alfred-waitlist",
+  "env": {
+    "NOTION_TOKEN": "@notion-token"
+  },
+  "routes": [
+    {
+      "src": "/api/submit",
+      "dest": "/api/submit.js"
+    }
+  ]
+}

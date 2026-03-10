@@ -1,0 +1,10 @@
+{
+  "name": "alfred-waitlist",
+  "version": "1.0.0",
+  "description": "Alfred waitlist API - saves emails to Notion",
+  "main": "api/submit.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {}
+}
